@@ -30,16 +30,16 @@ go build
 
 ### Running DevShedder
 
-To clean up your project directory:
+To clean up your workspace directory:
 
 ```bash
-./devshedder /path/to/your/project/directory
+./devshedder /path/to/your/workspace/directory
 ```
 
 To perform a dry run and see what would be deleted without actual deletion:
 
 ```bash
-./devshedder -dry-run /path/to/your/project/directory
+./devshedder -dry-run /path/to/your/workspace/directory
 ```
 
 ### Confirmation
