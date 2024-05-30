@@ -1,0 +1,19 @@
+project_name: devshedder
+release:
+  github:
+    owner: sarim
+    name: devshedder
+
+builds:
+  - goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - 386
+      - arm64
+      - arm
+    main: ./main.go
+    ldflags: "-s -w"
+    binary: devshedder_{{ .Version }}_{{ .Os }}_{{ .Arch }}
