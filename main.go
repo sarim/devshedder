@@ -10,11 +10,13 @@ import (
 )
 
 var dryRun bool
+var gitRootOnly bool
 var red = "\033[31m"
 var reset = "\033[0m"
 
 func init() {
 	flag.BoolVar(&dryRun, "dry-run", false, "Perform a dry run without deleting files")
+	flag.BoolVar(&gitRootOnly, "git-root-only", false, "Only clean directories that are in the root of a git repository")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 		fmt.Fprintln(flag.CommandLine.Output(), "[flags] path_to_workspace_directory")
@@ -37,7 +39,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Fprintf(os.Stderr, "Deleting files in %s\nDry run: %t\n", startDir, dryRun)
+	fmt.Fprintf(os.Stderr, "Deleting files in %s\nDry run: %t\nGit root only: %t\n", startDir, dryRun, gitRootOnly)
 
 	err := filepath.Walk(startDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -46,6 +48,10 @@ func main() {
 				return nil
 			}
 			return err
+		}
+
+		if gitRootOnly && !isGitRoot(path) {
+			return nil
 		}
 
 		// Skip .git folder to speed up scan
@@ -124,4 +130,11 @@ func confirmAction() bool {
 	}
 	response = strings.TrimSpace(response)
 	return response == "y" || response == "Y"
+}
+
+// isGitRoot checks if the given path contains a .git folder
+func isGitRoot(path string) bool {
+	gitPath := filepath.Join(filepath.Dir(path), ".git")
+	_, err := os.Stat(gitPath)
+	return !os.IsNotExist(err)
 }
