@@ -48,6 +48,11 @@ func main() {
 			return err
 		}
 
+		// Skip .git folder to speed up scan
+		if info.IsDir() && info.Name() == ".git" {
+			return filepath.SkipDir
+		}
+
 		// Node.js Projects: Delete node_modules
 		if info.IsDir() && info.Name() == "node_modules" {
 			parentDir := filepath.Dir(path)
