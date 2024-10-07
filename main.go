@@ -17,7 +17,7 @@ func init() {
 	flag.BoolVar(&dryRun, "dry-run", false, "Perform a dry run without deleting files")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
-		fmt.Fprintln(flag.CommandLine.Output(), "[flags] path_to_project_directory")
+		fmt.Fprintln(flag.CommandLine.Output(), "[flags] path_to_workspace_directory")
 		flag.PrintDefaults()
 	}
 }
@@ -26,14 +26,14 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
-		fmt.Fprintf(os.Stderr, "%sError: You must provide exactly one path to a project directory%s", red, reset)
+		fmt.Fprintf(os.Stderr, "%sError: You must provide exactly one path to a workspace directory%s\n", red, reset)
 		flag.Usage()
 		os.Exit(1)
 	}
 	startDir := args[0]
 
 	if !dryRun && !confirmAction() {
-		fmt.Fprintf(os.Stderr, "Operation cancelled.")
+		fmt.Fprintf(os.Stderr, "Operation cancelled.\n")
 		os.Exit(1)
 	}
 
