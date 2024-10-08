@@ -50,10 +50,6 @@ func main() {
 			return err
 		}
 
-		if gitRootOnly && !isGitRoot(path) {
-			return nil
-		}
-
 		// Skip .git folder to speed up scan
 		if info.IsDir() && info.Name() == ".git" {
 			return filepath.SkipDir
@@ -62,6 +58,9 @@ func main() {
 		// Node.js Projects: Delete node_modules
 		if info.IsDir() && info.Name() == "node_modules" {
 			parentDir := filepath.Dir(path)
+			if gitRootOnly && !isGitRoot(parentDir) {
+				return nil
+			}
 			if hasFile(parentDir, "package.json") {
 				fmt.Printf("Found node_modules to delete: \t%s\n", path)
 				if !dryRun {
@@ -77,6 +76,9 @@ func main() {
 		// PHP Projects: Delete vendor
 		if info.IsDir() && info.Name() == "vendor" {
 			parentDir := filepath.Dir(path)
+			if gitRootOnly && !isGitRoot(parentDir) {
+				return nil
+			}
 			if hasFile(parentDir, "composer.json") {
 				fmt.Printf("Found vendor to delete: \t%s\n", path)
 				if !dryRun {
@@ -90,8 +92,11 @@ func main() {
 		}
 
 		// Symfony Projects: Delete var/log
-		if info.IsDir() && filepath.Base(path) == "log" && filepath.Base(filepath.Dir(path)) == "var" {
-			parentDir := filepath.Dir(filepath.Dir(path)) // Two levels up from var/log
+		if info.IsDir() && (filepath.Base(path) == "log" || filepath.Base(path) == "cache") && filepath.Base(filepath.Dir(path)) == "var" {
+			parentDir := filepath.Dir(filepath.Dir(path)) // Two levels up from var/log or var/cache
+			if gitRootOnly && !isGitRoot(parentDir) {
+				return nil
+			}
 			if hasFile(parentDir, "symfony.lock") {
 				fmt.Printf("Found var/log to delete: \t%s\n", path)
 				if !dryRun {
@@ -134,7 +139,7 @@ func confirmAction() bool {
 
 // isGitRoot checks if the given path contains a .git folder
 func isGitRoot(path string) bool {
-	gitPath := filepath.Join(filepath.Dir(path), ".git")
+	gitPath := filepath.Join(path, ".git")
 	_, err := os.Stat(gitPath)
 	return !os.IsNotExist(err)
 }
