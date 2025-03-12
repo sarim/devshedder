@@ -109,6 +109,24 @@ func main() {
 			}
 		}
 
+		// Flutter Projects: Delete build directory and .dart_tool
+		if info.IsDir() && (info.Name() == "build" || info.Name() == ".dart_tool") {
+			parentDir := filepath.Dir(path)
+			if gitRootOnly && !isGitRoot(parentDir) {
+				return nil
+			}
+			if hasFile(parentDir, "pubspec.yaml") {
+				fmt.Printf("Found Flutter %s to delete: \t%s\n", info.Name(), path)
+				if !dryRun {
+					err := os.RemoveAll(path)
+					if err != nil {
+						return err
+					}
+				}
+				return filepath.SkipDir
+			}
+		}
+
 		return nil
 	})
 
